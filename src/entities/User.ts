@@ -13,7 +13,7 @@ import {
 export class User extends BaseEntity {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
-  id: number;
+  readonly id: number;
 
   @Field()
   @CreateDateColumn()
