@@ -2,6 +2,7 @@ import "dotenv/config";
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -14,7 +15,7 @@ const main = async () => {
     url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
-    entities: [Post],
+    entities: [Post, User],
   });
 
   // Express
