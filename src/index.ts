@@ -13,6 +13,9 @@ import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { MyContext } from "./types/expressContext";
+import https from "https";
+import fs from "fs";
+import path from "path";
 
 const main = async () => {
   try {
@@ -37,8 +40,10 @@ const main = async () => {
       session({
         store: new RedisStore({ client: redisClient, disableTouch: true }),
         cookie: {
-          sameSite: "lax",
-          secure: __prod__,
+          sameSite: "none",
+          secure: true,
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
         },
         name: COOKIE_NAME,
         saveUninitialized: false,
@@ -58,12 +63,35 @@ const main = async () => {
       }),
     });
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
-
-    // Start server
-    app.listen(port, () => {
-      console.log("server listening on port:", port);
+    apolloServer.applyMiddleware({
+      app,
+      cors: {
+        origin: process.env.CORS_ORIGIN,
+        credentials: true,
+      },
     });
+
+    if (__prod__) {
+      // Start server in production
+      app.listen(port, () => {
+        console.log("server listening on port:", port);
+      });
+    } else {
+      // Create https server in development for cookies cors setting
+      const sslFolder = path.join(__dirname, "..", "local-ssl");
+      const manualServer = https.createServer(
+        {
+          key: fs.readFileSync(`${sslFolder}/key.pem`),
+          cert: fs.readFileSync(`${sslFolder}/cert.pem`),
+          passphrase: process.env.SSL_PASSPHASE,
+        },
+        app
+      );
+
+      manualServer.listen(port, () => {
+        console.log("development server listening on port:", port);
+      });
+    }
   } catch (err) {
     console.error(err);
   }
