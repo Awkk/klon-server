@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import { User } from "../entities/User";
 import { getConnection } from "typeorm";
@@ -9,8 +9,19 @@ import { MyContext } from "../types/expressContext";
 
 @Resolver()
 export class UserResolver {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: MyContext) {
+    if (!req.session.userId) {
+      return null;
+    }
+    return await User.findOne(req.session.userId);
+  }
+
   @Mutation(() => UserResponse)
-  async register(@Arg("auth") auth: UserAuthInput): Promise<UserResponse> {
+  async register(
+    @Arg("auth") auth: UserAuthInput,
+    @Ctx() { req }: MyContext
+  ): Promise<UserResponse> {
     let user;
     try {
       const hashedPw = await argon2.hash(auth.password);
@@ -32,6 +43,8 @@ export class UserResolver {
         }
       }
     }
+    // create login session and send cookie
+    req.session.userId = user.id;
 
     return { user };
   }
@@ -50,7 +63,7 @@ export class UserResolver {
     if (!validPw) {
       return { errors: [{ field: "password", message: "incorrect password" }] };
     }
-
+    // create login session and send cookie
     req.session.userId = user.id;
 
     return { user };
