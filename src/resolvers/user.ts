@@ -1,10 +1,11 @@
-import { Arg, Mutation, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import { User } from "../entities/User";
-import { getConnection, QueryFailedError } from "typeorm";
+import { getConnection } from "typeorm";
 import { UserAuthInput } from "./types/userAuthInput";
 import { UserResponse } from "./types/userResponse";
 import { isQueryFailedError } from "./types/errorTypeCheck";
+import { MyContext } from "../types/expressContext";
 
 @Resolver()
 export class UserResolver {
@@ -36,7 +37,10 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponse)
-  async login(@Arg("auth") auth: UserAuthInput): Promise<UserResponse> {
+  async login(
+    @Arg("auth") auth: UserAuthInput,
+    @Ctx() { req }: MyContext
+  ): Promise<UserResponse> {
     const user = await User.findOne({ where: { username: auth.username } });
     if (!user) {
       return { errors: [{ field: "username", message: "user not exist" }] };
@@ -46,6 +50,9 @@ export class UserResolver {
     if (!validPw) {
       return { errors: [{ field: "password", message: "incorrect password" }] };
     }
+
+    req.session.userId = user.id;
+
     return { user };
   }
 }
