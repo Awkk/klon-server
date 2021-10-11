@@ -4,6 +4,7 @@ import express from "express";
 import session from "express-session";
 import redis from "redis";
 import connectRedis from "connect-redis";
+import cors from "cors";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-express";
 import { createConnection } from "typeorm";
@@ -31,6 +32,13 @@ const main = async () => {
     // Express
     const app = express();
     const port = process.env.PORT;
+
+    app.use(
+      cors({
+        origin: process.env.CORS_ORIGIN,
+        credentials: true,
+      })
+    );
 
     // Redis connection
     const RedisStore = connectRedis(session);
@@ -65,10 +73,7 @@ const main = async () => {
     await apolloServer.start();
     apolloServer.applyMiddleware({
       app,
-      cors: {
-        origin: process.env.CORS_ORIGIN,
-        credentials: true,
-      },
+      cors: false,
     });
 
     if (__prod__) {
