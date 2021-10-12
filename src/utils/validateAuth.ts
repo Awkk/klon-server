@@ -1,4 +1,4 @@
-import { FieldError } from "src/resolvers/types/FieldError";
+import { FieldError } from "../resolvers/types/FieldError";
 import { UserAuthInput } from "../resolvers/types/userAuthInput";
 
 export const validateAuth = (auth: UserAuthInput): FieldError[] => {
