@@ -7,6 +7,7 @@ import { UserResponse } from "./types/userResponse";
 import { isQueryFailedError } from "./types/errorTypeCheck";
 import { MyContext } from "../types/expressContext";
 import { validateAuth } from "../utils/validateAuth";
+import { COOKIE_NAME } from "../constants";
 
 @Resolver()
 export class UserResolver {
@@ -73,5 +74,22 @@ export class UserResolver {
     req.session.userId = user.id;
 
     return { user };
+  }
+
+  @Mutation(() => Boolean)
+  async logout(@Ctx() { req, res }: MyContext) {
+    // clear cookie on client
+    res.clearCookie(COOKIE_NAME, { sameSite: "none", secure: true });
+    // clear session on server
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+    );
   }
 }
