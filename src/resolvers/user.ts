@@ -6,6 +6,7 @@ import { UserAuthInput } from "./types/userAuthInput";
 import { UserResponse } from "./types/userResponse";
 import { isQueryFailedError } from "./types/errorTypeCheck";
 import { MyContext } from "../types/expressContext";
+import { validateAuth } from "../utils/validateAuth";
 
 @Resolver()
 export class UserResolver {
@@ -24,6 +25,11 @@ export class UserResolver {
   ): Promise<UserResponse> {
     let user;
     try {
+      const validationError = validateAuth(auth);
+      if (validationError.length > 0) {
+        return { errors: validationError };
+      }
+
       const hashedPw = await argon2.hash(auth.password);
       const result = await getConnection()
         .createQueryBuilder()
