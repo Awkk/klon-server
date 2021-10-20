@@ -12,12 +12,34 @@ import {
 import { getConnection } from "typeorm";
 import { Post } from "../entities/Post";
 import { PostInput } from "./types/postInput";
+import { PaginatedPosts } from "./types/paginatedPosts";
 
 @Resolver()
 export class PostResolver {
-  @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    return Post.find();
+  @Query(() => PaginatedPosts)
+  async posts(
+    @Arg("limit", () => Int, { nullable: true, defaultValue: 20 })
+    limit: number,
+    @Arg("cursor", () => String, { nullable: true })
+    cursor: number | null
+  ): Promise<PaginatedPosts> {
+    const cappedLimit = Math.min(50, limit);
+    const query = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("posts")
+      .orderBy('"createdDate"', "DESC")
+      .take(cappedLimit + 1);
+
+    if (cursor) {
+      query.where('"createdDate" < :cursor', { cursor });
+    }
+
+    const posts = await query.getMany();
+
+    return {
+      posts: posts.slice(0, cappedLimit),
+      hasMore: posts.length === cappedLimit + 1,
+    };
   }
 
   @Query(() => Post, { nullable: true })
