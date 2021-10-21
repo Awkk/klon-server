@@ -33,6 +33,7 @@ export class VoteResolver {
           .update(Post)
           .set({ score: () => "score + :x" })
           .setParameter("x", -lastVote.value)
+          .where("id = :postId", { postId: postId })
           .execute();
       });
     } else if (lastVote && lastVote.value !== finalValue) {
@@ -49,6 +50,7 @@ export class VoteResolver {
           .update(Post)
           .set({ score: () => "score + :x" })
           .setParameter("x", finalValue - lastVote.value)
+          .where("id = :postId", { postId: postId })
           .execute();
       });
     } else if (!lastVote) {
@@ -65,6 +67,7 @@ export class VoteResolver {
           .update(Post)
           .set({ score: () => "score + :x" })
           .setParameter("x", finalValue)
+          .where("id = :postId", { postId: postId })
           .execute();
       });
     } else {
