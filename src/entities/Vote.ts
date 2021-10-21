@@ -6,11 +6,11 @@ import { User } from "./User";
 @ObjectType()
 @Entity()
 export class Vote extends BaseEntity {
-  @Field()
+  @Field(() => Int)
   @PrimaryColumn()
   userId: number;
 
-  @Field()
+  @Field(() => Int)
   @PrimaryColumn()
   postId: number;
 
