@@ -27,11 +27,12 @@ export class PostResolver {
     const query = getConnection()
       .getRepository(Post)
       .createQueryBuilder("posts")
-      .orderBy('"createdDate"', "DESC")
+      .leftJoinAndSelect("posts.author", "user")
+      .orderBy("posts.createdDate", "DESC")
       .take(cappedLimit + 1);
 
     if (cursor) {
-      query.where('"createdDate" < :cursor', { cursor });
+      query.where("posts.createdDate < :cursor", { cursor });
     }
 
     const posts = await query.getMany();
