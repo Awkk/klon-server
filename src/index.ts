@@ -17,6 +17,8 @@ import { MyContext } from "./types/expressContext";
 import https from "https";
 import fs from "fs";
 import path from "path";
+import { Vote } from "./entities/Vote";
+import { VoteResolver } from "./resolvers/vote";
 
 const main = async () => {
   try {
@@ -26,7 +28,7 @@ const main = async () => {
       url: process.env.DATABASE_URL,
       logging: true,
       synchronize: true,
-      entities: [Post, User],
+      entities: [Post, User, Vote],
     });
 
     // Express
@@ -63,7 +65,7 @@ const main = async () => {
     // Apollo Server
     const apolloServer = new ApolloServer({
       schema: await buildSchema({
-        resolvers: [PostResolver, UserResolver],
+        resolvers: [PostResolver, UserResolver, VoteResolver],
       }),
       context: ({ req, res }): MyContext => ({
         req,
