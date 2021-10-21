@@ -1,21 +1,38 @@
-import { isAuth } from "../middleware/isAuth";
 import { MyContext } from "src/types/expressContext";
 import {
   Arg,
   Ctx,
+  FieldResolver,
   Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { getConnection } from "typeorm";
 import { Post } from "../entities/Post";
-import { PostInput } from "./types/postInput";
+import { Vote } from "../entities/Vote";
+import { isAuth } from "../middleware/isAuth";
 import { PaginatedPosts } from "./types/paginatedPosts";
+import { PostInput } from "./types/postInput";
 
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver()
+  async voteStatus(@Root() post: Post, @Ctx() { req }: MyContext) {
+    const userId = req.session.userId;
+    if (userId) {
+      const lastVote = await getConnection()
+        .getRepository(Vote)
+        .findOne({ postId: post.id, userId: req.session.userId });
+      if (lastVote) {
+        return lastVote.value;
+      }
+    }
+    return 0;
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int, { nullable: true, defaultValue: 20 })

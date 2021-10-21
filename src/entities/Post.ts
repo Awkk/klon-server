@@ -27,7 +27,7 @@ export class Post extends BaseEntity {
   @Column()
   text: string;
 
-  @Field(()=>Int)
+  @Field(() => Int)
   @Column("int", { default: 0 })
   score: number;
 
@@ -35,7 +35,7 @@ export class Post extends BaseEntity {
   @Column("int", { default: 0 })
   views: string;
 
-  @Field(()=>Int)
+  @Field(() => Int)
   @Column()
   authorId: number;
 
@@ -45,6 +45,9 @@ export class Post extends BaseEntity {
 
   @OneToMany(() => Vote, (vote) => vote.post)
   votes: Vote[];
+
+  @Field(() => Int)
+  voteStatus: number;
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })
