@@ -62,7 +62,12 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+    const post = await Post.findOne(id, { relations: ["author"] });
+    if (post) {
+      post.views++;
+      await post.save();
+    }
+    return post;
   }
 
   @Mutation(() => Post)

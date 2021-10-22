@@ -31,9 +31,9 @@ export class Post extends BaseEntity {
   @Column("int", { default: 0 })
   score: number;
 
-  @Field()
+  @Field(() => Int)
   @Column("int", { default: 0 })
-  views: string;
+  views: number;
 
   @Field(() => Int)
   @Column()
