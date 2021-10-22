@@ -55,6 +55,7 @@ export class PostResolver {
     const posts = await query.getMany();
 
     return {
+      id: `L:${limit}C:${cursor}`,
       posts: posts.slice(0, cappedLimit),
       hasMore: posts.length === cappedLimit + 1,
     };
