@@ -1,29 +1,30 @@
+import { passwordLength, usernameLength } from "src/constants";
 import { FieldError } from "../resolvers/types/FieldError";
 import { UserAuthInput } from "../resolvers/types/userAuthInput";
 
 export const validateAuth = (auth: UserAuthInput): FieldError[] => {
   const error: FieldError[] = [];
-  if (auth.username.length < 3) {
+  if (auth.username.length < usernameLength.minLength) {
     error.push({
       field: "username",
-      message: "Must be at least 3 characters long",
+      message: `Must be at least ${usernameLength.minLength} characters long`,
     });
-  } else if (auth.username.length > 20) {
+  } else if (auth.username.length > usernameLength.maxLength) {
     error.push({
       field: "username",
-      message: "Must be at most 20 characters long",
+      message: `Must be at most ${usernameLength.maxLength} characters long`,
     });
   }
 
-  if (auth.password.length < 3) {
+  if (auth.password.length < passwordLength.minLength) {
     error.push({
       field: "password",
-      message: "Must be at least 3 characters long",
+      message: `Must be at least ${passwordLength.minLength} characters long`,
     });
-  } else if (auth.username.length > 128) {
+  } else if (auth.username.length > passwordLength.minLength) {
     error.push({
       field: "password",
-      message: "Must be at most 128 characters long",
+      message: `Must be at most ${passwordLength.minLength} characters long`,
     });
   }
 
