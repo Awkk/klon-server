@@ -1,4 +1,4 @@
-import { passwordLength, usernameLength } from "src/constants";
+import { passwordLength, usernameLength } from "../constants";
 import { FieldError } from "../resolvers/types/FieldError";
 import { UserAuthInput } from "../resolvers/types/userAuthInput";
 
