@@ -99,7 +99,16 @@ export class PostResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
-  async deletePost(@Arg("id", () => Int) id: number): Promise<boolean> {
+  async deletePost(
+    @Arg("id", () => Int) id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    const post = await Post.findOne(id);
+    if (!post) return false;
+    if (post.authorId !== req.session.userId) {
+      throw new Error("not authorized");
+    }
+    await Vote.delete({ postId: id });
     const result = await Post.delete(id);
     return result.affected === 1;
   }
