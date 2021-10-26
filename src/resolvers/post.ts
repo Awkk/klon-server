@@ -84,13 +84,17 @@ export class PostResolver {
   @UseMiddleware(isAuth)
   async updatePost(
     @Arg("id", () => Int) id: number,
-    @Arg("input") input: PostInput
+    @Arg("input") input: PostInput,
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
     const result = await getConnection()
       .createQueryBuilder()
       .update(Post)
       .set({ ...input })
-      .where("id = :id", { id: id })
+      .where('id = :id and "authorId" = :authorId', {
+        id: id,
+        authorId: req.session.userId,
+      })
       .returning("*")
       .execute();
 
