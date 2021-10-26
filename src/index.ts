@@ -1,24 +1,25 @@
-import "dotenv/config";
-import "reflect-metadata";
-import express from "express";
-import session from "express-session";
-import redis from "redis";
+import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
 import cors from "cors";
+import "dotenv/config";
+import express from "express";
+import session from "express-session";
+import fs from "fs";
+import https from "https";
+import path from "path";
+import redis from "redis";
+import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { ApolloServer } from "apollo-server-express";
 import { createConnection } from "typeorm";
+import { COOKIE_NAME, __prod__ } from "./constants";
+import { createUserLoader } from "./dataLoaders/createUserLoader";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import { Vote } from "./entities/Vote";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import { COOKIE_NAME, __prod__ } from "./constants";
-import { MyContext } from "./types/expressContext";
-import https from "https";
-import fs from "fs";
-import path from "path";
-import { Vote } from "./entities/Vote";
 import { VoteResolver } from "./resolvers/vote";
+import { MyContext } from "./types/expressContext";
 
 const main = async () => {
   try {
@@ -70,6 +71,7 @@ const main = async () => {
       context: ({ req, res }): MyContext => ({
         req,
         res,
+        userLoader: createUserLoader(),
       }),
     });
     await apolloServer.start();

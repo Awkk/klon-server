@@ -1,4 +1,3 @@
-import { MyContext } from "src/types/expressContext";
 import {
   Arg,
   Ctx,
@@ -12,14 +11,16 @@ import {
 } from "type-graphql";
 import { getConnection } from "typeorm";
 import { Post } from "../entities/Post";
+import { User } from "../entities/User";
 import { Vote } from "../entities/Vote";
 import { isAuth } from "../middleware/isAuth";
+import { MyContext } from "../types/expressContext";
 import { PaginatedPosts } from "./types/paginatedPosts";
 import { PostInput } from "./types/postInput";
 
 @Resolver(Post)
 export class PostResolver {
-  @FieldResolver()
+  @FieldResolver(() => Int)
   async voteStatus(@Root() post: Post, @Ctx() { req }: MyContext) {
     const userId = req.session.userId;
     if (userId) {
@@ -33,6 +34,11 @@ export class PostResolver {
     return 0;
   }
 
+  @FieldResolver(() => User)
+  async author(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.authorId);
+  }
+
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int, { nullable: true, defaultValue: 20 })
@@ -44,7 +50,6 @@ export class PostResolver {
     const query = getConnection()
       .getRepository(Post)
       .createQueryBuilder("posts")
-      .leftJoinAndSelect("posts.author", "user")
       .orderBy("posts.createdDate", "DESC")
       .take(cappedLimit + 1);
 
@@ -63,7 +68,7 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    const post = await Post.findOne(id, { relations: ["author"] });
+    const post = await Post.findOne(id);
     if (post) {
       post.views++;
       await post.save();
