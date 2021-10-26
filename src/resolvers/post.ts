@@ -21,12 +21,16 @@ import { PostInput } from "./types/postInput";
 @Resolver(Post)
 export class PostResolver {
   @FieldResolver(() => Int)
-  async voteStatus(@Root() post: Post, @Ctx() { req }: MyContext) {
+  async voteStatus(
+    @Root() post: Post,
+    @Ctx() { req, voteLoader }: MyContext
+  ): Promise<number> {
     const userId = req.session.userId;
     if (userId) {
-      const lastVote = await getConnection()
-        .getRepository(Vote)
-        .findOne({ postId: post.id, userId: req.session.userId });
+      const lastVote = await voteLoader.load({
+        postId: post.id,
+        userId: userId,
+      });
       if (lastVote) {
         return lastVote.value;
       }
@@ -35,7 +39,10 @@ export class PostResolver {
   }
 
   @FieldResolver(() => User)
-  async author(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+  async author(
+    @Root() post: Post,
+    @Ctx() { userLoader }: MyContext
+  ): Promise<User> {
     return userLoader.load(post.authorId);
   }
 

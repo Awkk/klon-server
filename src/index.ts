@@ -13,6 +13,7 @@ import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { createUserLoader } from "./dataLoaders/createUserLoader";
+import { createVoteLoader } from "./dataLoaders/createVoteLoader";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { Vote } from "./entities/Vote";
@@ -72,6 +73,7 @@ const main = async () => {
         req,
         res,
         userLoader: createUserLoader(),
+        voteLoader: createVoteLoader(),
       }),
     });
     await apolloServer.start();
