@@ -26,6 +26,7 @@ export class Comment extends BaseEntity {
   @Column()
   authorId: number;
 
+  @Field(() => User)
   @ManyToOne(() => User, (user) => user.comments)
   author: User;
 
