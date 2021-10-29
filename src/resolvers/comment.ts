@@ -29,6 +29,11 @@ export class CommentResolver {
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
   ): Promise<Comment> {
+    const post = await Post.findOne(postId);
+    if (post) {
+      post.commentsCount++;
+      post.save();
+    }
     return Comment.create({
       postId: postId,
       authorId: req.session.userId,
@@ -68,7 +73,12 @@ export class CommentResolver {
     if (comment.authorId !== req.session.userId) {
       throw new Error("not authorized");
     }
-    const result = await Post.delete(id);
-    return result.affected === 1;
+    await comment.remove();
+    const post = await Post.findOne(comment.postId);
+    if (post) {
+      post.commentsCount--;
+      post.save();
+    }
+    return true;
   }
 }

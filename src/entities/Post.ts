@@ -54,6 +54,10 @@ export class Post extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
+  @Field(() => Int)
+  @Column("int", { default: 0 })
+  commentsCount: number;
+
   @Field()
   @CreateDateColumn({ type: "timestamptz" })
   createdDate: Date;
