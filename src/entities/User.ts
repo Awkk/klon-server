@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Post } from "./Post";
 import { Vote } from "./Vote";
+import { Comment } from "./Comment";
 
 @ObjectType()
 @Entity()
@@ -31,6 +32,10 @@ export class User extends BaseEntity {
   @Field(() => [Vote])
   @OneToMany(() => Vote, (vote) => vote.user)
   votes: Vote[];
+
+  @Field(() => [Comment])
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 
   @Field()
   @CreateDateColumn({ type: "timestamptz" })

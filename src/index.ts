@@ -17,6 +17,7 @@ import { createVoteLoader } from "./dataLoaders/createVoteLoader";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { Vote } from "./entities/Vote";
+import { Comment } from "./entities/Comment";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { VoteResolver } from "./resolvers/vote";
@@ -30,7 +31,7 @@ const main = async () => {
       url: process.env.DATABASE_URL,
       logging: true,
       synchronize: true,
-      entities: [Post, User, Vote],
+      entities: [Post, User, Vote, Comment],
     });
 
     // Express
