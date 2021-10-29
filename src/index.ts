@@ -14,10 +14,11 @@ import { createConnection } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { createUserLoader } from "./dataLoaders/createUserLoader";
 import { createVoteLoader } from "./dataLoaders/createVoteLoader";
+import { Comment } from "./entities/Comment";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { Vote } from "./entities/Vote";
-import { Comment } from "./entities/Comment";
+import { CommentResolver } from "./resolvers/comment";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { VoteResolver } from "./resolvers/vote";
@@ -68,7 +69,7 @@ const main = async () => {
     // Apollo Server
     const apolloServer = new ApolloServer({
       schema: await buildSchema({
-        resolvers: [PostResolver, UserResolver, VoteResolver],
+        resolvers: [PostResolver, UserResolver, VoteResolver, CommentResolver],
       }),
       context: ({ req, res }): MyContext => ({
         req,
