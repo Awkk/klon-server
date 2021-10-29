@@ -10,6 +10,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { getConnection } from "typeorm";
+import { Comment } from "../entities/Comment";
 import { Post } from "../entities/Post";
 import { User } from "../entities/User";
 import { Vote } from "../entities/Vote";
@@ -44,6 +45,11 @@ export class PostResolver {
     @Ctx() { userLoader }: MyContext
   ): Promise<User> {
     return userLoader.load(post.authorId);
+  }
+
+  @FieldResolver(() => [Comment])
+  async comments(@Root() post: Post): Promise<Comment[]> {
+    return Comment.find({ postId: post.id });
   }
 
   @Query(() => PaginatedPosts)
