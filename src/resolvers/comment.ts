@@ -62,14 +62,14 @@ export class CommentResolver {
     return result.raw[0];
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Number, { nullable: true })
   @UseMiddleware(isAuth)
   async deleteComment(
     @Arg("id", () => Int) id: number,
     @Ctx() { req }: MyContext
-  ): Promise<boolean> {
+  ): Promise<number | null> {
     const comment = await Comment.findOne(id);
-    if (!comment) return false;
+    if (!comment) return null;
     if (comment.authorId !== req.session.userId) {
       throw new Error("not authorized");
     }
@@ -79,6 +79,6 @@ export class CommentResolver {
       post.commentsCount--;
       post.save();
     }
-    return true;
+    return post ? post.id : null;
   }
 }
