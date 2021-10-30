@@ -138,6 +138,7 @@ export class PostResolver {
       throw new Error("not authorized");
     }
     await Vote.delete({ postId: id });
+    await Comment.delete({ postId: id });
     const result = await Post.delete(id);
     return result.affected === 1;
   }
