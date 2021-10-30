@@ -25,7 +25,7 @@ export class CommentResolver {
   @Mutation(() => Comment)
   @UseMiddleware(isAuth)
   async createComment(
-    @Arg("postId") postId: number,
+    @Arg("postId", () => Int) postId: number,
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
   ): Promise<Comment> {

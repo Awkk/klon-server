@@ -49,7 +49,14 @@ export class PostResolver {
 
   @FieldResolver(() => [Comment])
   async comments(@Root() post: Post): Promise<Comment[]> {
-    return Comment.find({ postId: post.id });
+    return Comment.find({
+      where: {
+        postId: post.id,
+      },
+      order: {
+        createdDate: "ASC",
+      },
+    });
   }
 
   @Query(() => PaginatedPosts)
