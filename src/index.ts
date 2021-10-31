@@ -33,6 +33,7 @@ const main = async () => {
       logging: true,
       //synchronize: true,
       entities: [Post, User, Vote, Comment],
+      migrations: [path.join(__dirname, "./migrations/*")],
     });
     await dbCon.runMigrations();
 
