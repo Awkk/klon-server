@@ -5,5 +5,6 @@ declare namespace NodeJS {
     SESSION_SECRET: string;
     CORS_ORIGIN: string;
     SSL_PASSPHASE: string;
+    REDIS_URL: string;
   }
 }

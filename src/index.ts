@@ -27,18 +27,19 @@ import { MyContext } from "./types/expressContext";
 const main = async () => {
   try {
     // PostgreSQL connection
-    await createConnection({
+    const dbCon = await createConnection({
       type: "postgres",
       url: process.env.DATABASE_URL,
       logging: true,
-      synchronize: true,
+      //synchronize: true,
       entities: [Post, User, Vote, Comment],
     });
+    await dbCon.runMigrations();
 
     // Express
     const app = express();
     const port = process.env.PORT;
-
+    app.set("trust proxy", 1);
     app.use(
       cors({
         origin: process.env.CORS_ORIGIN,
@@ -48,7 +49,7 @@ const main = async () => {
 
     // Redis connection
     const RedisStore = connectRedis(session);
-    const redisClient = redis.createClient();
+    const redisClient = redis.createClient({ url: process.env.REDIS_URL });
     // Session based authentication with Redis
     app.use(
       session({

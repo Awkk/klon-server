@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "NODE_ENV=production tsc",
     "watch": "tsc -w",
     "dev": "nodemon dist/index.js",
     "start": "node dist/index.js"
@@ -19,7 +20,7 @@
     "@types/node": "^16.10.3",
     "@types/redis": "^2.8.32",
     "nodemon": "^2.0.13",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "apollo-server-express": "^3.3.0",

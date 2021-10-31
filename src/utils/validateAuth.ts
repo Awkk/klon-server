@@ -1,5 +1,5 @@
 import { passwordLength, usernameLength } from "../constants";
-import { FieldError } from "../resolvers/types/FieldError";
+import { FieldError } from "../resolvers/types/fieldError";
 import { UserAuthInput } from "../resolvers/types/userAuthInput";
 
 export const validateAuth = (auth: UserAuthInput): FieldError[] => {
