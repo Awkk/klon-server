@@ -56,7 +56,7 @@ const main = async () => {
       session({
         store: new RedisStore({ client: redisClient, disableTouch: true }),
         cookie: {
-          sameSite: "none",
+          sameSite: "lax",
           secure: true,
           httpOnly: true,
           maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
