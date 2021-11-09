@@ -30,12 +30,14 @@ const main = async () => {
     const dbCon = await createConnection({
       type: "postgres",
       url: process.env.DATABASE_URL,
-      logging: true,
-      //synchronize: true,
+      logging: !__prod__,
+      synchronize: !__prod__,
       entities: [Post, User, Vote, Comment],
       migrations: [path.join(__dirname, "./migrations/*")],
     });
-    await dbCon.runMigrations();
+    if (__prod__) {
+      await dbCon.runMigrations();
+    }
 
     // Express
     const app = express();
@@ -56,7 +58,7 @@ const main = async () => {
       session({
         store: new RedisStore({ client: redisClient, disableTouch: true }),
         cookie: {
-          sameSite: "lax",
+          sameSite: __prod__ ? "lax" : "none",
           secure: true,
           httpOnly: true,
           maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
