@@ -24,8 +24,8 @@ export class Post extends BaseEntity {
   @Column()
   title: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   text: string;
 
   @Field({ nullable: true })
