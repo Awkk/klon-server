@@ -16,6 +16,7 @@ import { User } from "../entities/User";
 import { Vote } from "../entities/Vote";
 import { isAuth } from "../middleware/isAuth";
 import { MyContext } from "../types/expressContext";
+import { getPreviewImg } from "../utils/getPreviewImg";
 import { PaginatedPosts } from "./types/paginatedPosts";
 import { PostInput } from "./types/postInput";
 
@@ -107,7 +108,15 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post> {
-    return Post.create({ ...input, authorId: req.session.userId }).save();
+    let previewImg;
+    if (input.link) {
+      previewImg = await getPreviewImg(input.link);
+    }
+    return Post.create({
+      ...input,
+      authorId: req.session.userId,
+      previewImg: previewImg,
+    }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
@@ -117,10 +126,14 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post | null> {
+    let previewImg;
+    if (input.link) {
+      previewImg = await getPreviewImg(input.link);
+    }
     const result = await getConnection()
       .createQueryBuilder()
       .update(Post)
-      .set({ ...input })
+      .set({ ...input, previewImg: previewImg })
       .where('id = :id and "authorId" = :authorId', {
         id: id,
         authorId: req.session.userId,

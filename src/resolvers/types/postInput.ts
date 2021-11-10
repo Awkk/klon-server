@@ -5,7 +5,7 @@ export class PostInput {
   @Field()
   title: string;
   @Field()
-  text: string;
+  text?: string;
   @Field({ nullable: true })
-  link: string;
+  link?: string;
 }

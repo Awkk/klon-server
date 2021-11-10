@@ -26,11 +26,15 @@ export class Post extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  text: string;
+  text?: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  link: string;
+  link?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  previewImg?: string;
 
   @Field(() => Int)
   @Column("int", { default: 0 })
