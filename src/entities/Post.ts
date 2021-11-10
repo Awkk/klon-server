@@ -28,6 +28,10 @@ export class Post extends BaseEntity {
   @Column()
   text: string;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  link: string;
+
   @Field(() => Int)
   @Column("int", { default: 0 })
   score: number;

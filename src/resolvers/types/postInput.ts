@@ -6,4 +6,6 @@ export class PostInput {
   title: string;
   @Field()
   text: string;
+  @Field({ nullable: true })
+  link: string;
 }
