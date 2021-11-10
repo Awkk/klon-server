@@ -64,7 +64,9 @@ export class PostResolver {
     @Arg("limit", () => Int, { nullable: true, defaultValue: 20 })
     limit: number,
     @Arg("cursor", () => String, { nullable: true })
-    cursor: number | null
+    cursor: number | null,
+    @Arg("userId", () => Int, { nullable: true })
+    userId: number
   ): Promise<PaginatedPosts> {
     const cappedLimit = Math.min(50, limit);
     const query = getConnection()
@@ -74,13 +76,16 @@ export class PostResolver {
       .take(cappedLimit + 1);
 
     if (cursor) {
-      query.where("posts.createdDate < :cursor", { cursor });
+      query.andWhere("posts.createdDate < :cursor", { cursor });
+    }
+    if (userId) {
+      query.andWhere("posts.authorId = :userId", { userId });
     }
 
     const posts = await query.getMany();
 
     return {
-      id: `L:${limit}C:${cursor}`,
+      id: `L:${limit}C:${cursor}U:${userId}`,
       posts: posts.slice(0, cappedLimit),
       hasMore: posts.length === cappedLimit + 1,
     };
