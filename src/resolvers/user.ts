@@ -1,13 +1,13 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import argon2 from "argon2";
-import { User } from "../entities/User";
+import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
 import { getConnection } from "typeorm";
-import { UserAuthInput } from "./types/userAuthInput";
-import { UserResponse } from "./types/userResponse";
-import { isQueryFailedError } from "./types/errorTypeCheck";
+import { COOKIE_NAME } from "../constants";
+import { User } from "../entities/User";
 import { MyContext } from "../types/expressContext";
 import { validateAuth } from "../utils/validateAuth";
-import { COOKIE_NAME } from "../constants";
+import { isQueryFailedError } from "./types/errorTypeCheck";
+import { UserAuthInput } from "./types/userAuthInput";
+import { UserResponse } from "./types/userResponse";
 
 @Resolver()
 export class UserResolver {
@@ -17,6 +17,12 @@ export class UserResolver {
       return null;
     }
     return await User.findOne(req.session.userId);
+  }
+
+  @Query(() => User, { nullable: true })
+  async user(@Arg("id", () => Int) id: number): Promise<User | null> {
+    const user = await User.findOne(id);
+    return user ? user : null;
   }
 
   @Mutation(() => UserResponse)
