@@ -21,10 +21,10 @@ export const validateAuth = (auth: UserAuthInput): FieldError[] => {
       field: "password",
       message: `Must be at least ${passwordLength.minLength} characters long`,
     });
-  } else if (auth.username.length > passwordLength.minLength) {
+  } else if (auth.username.length > passwordLength.maxLength) {
     error.push({
       field: "password",
-      message: `Must be at most ${passwordLength.minLength} characters long`,
+      message: `Must be at most ${passwordLength.maxLength} characters long`,
     });
   }
 
