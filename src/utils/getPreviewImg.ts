@@ -17,7 +17,7 @@ export const getPreviewImg = async (
       // link is from youtube
       const videoIdRegex = /youtube\.com.*(\?v=|\/embed\/)(.{11})/;
       const videoId = link.match(videoIdRegex)?.pop();
-      previewImg = `http://img.youtube.com/vi/${videoId}/0.jpg`;
+      previewImg = `https://img.youtube.com/vi/${videoId}/0.jpg`;
     } else {
       // scrape meta data from page for thumbnail
       const { body: html, url } = await got(link);
