@@ -19,6 +19,7 @@ import { MyContext } from "../types/expressContext";
 import { getPreviewImg } from "../utils/getPreviewImg";
 import { PaginatedPosts } from "./types/paginatedPosts";
 import { PostInput } from "./types/postInput";
+import { PostSort, SortOrder } from "./types/postSortEnum";
 
 @Resolver(Post)
 export class PostResolver {
@@ -65,20 +66,40 @@ export class PostResolver {
     @Arg("limit", () => Int, { nullable: true, defaultValue: 20 })
     limit: number,
     @Arg("cursor", () => String, { nullable: true })
-    cursor: number | null,
+    cursor: string | null,
+    @Arg("idCursor", () => Int, { nullable: true })
+    idCursor: number | null,
     @Arg("userId", () => Int, { nullable: true })
-    userId: number
+    userId: number | null,
+    @Arg("sort", () => PostSort, {
+      nullable: true,
+      defaultValue: PostSort.createdDate,
+    })
+    sort: PostSort,
+    @Arg("order", () => SortOrder, {
+      nullable: true,
+      defaultValue: SortOrder.DESC,
+    })
+    order: SortOrder
   ): Promise<PaginatedPosts> {
     const cappedLimit = Math.min(50, limit);
     const query = getConnection()
       .getRepository(Post)
       .createQueryBuilder("posts")
-      .orderBy("posts.createdDate", "DESC")
+      .orderBy(`posts.${sort}`, order)
       .take(cappedLimit + 1);
 
-    if (cursor) {
-      query.andWhere("posts.createdDate < :cursor", { cursor });
+    const compare = order === SortOrder.DESC ? "<" : ">";
+
+    if (cursor && idCursor) {
+      query.andWhere(`posts.${sort} ${compare} :cursor`, { cursor });
+      query.orWhere(`posts.${sort} = :cursor AND posts.id > :idCursor`, {
+        cursor,
+        idCursor,
+      });
+      query.addOrderBy("posts.id", "ASC");
     }
+
     if (userId) {
       query.andWhere("posts.authorId = :userId", { userId });
     }
@@ -86,7 +107,7 @@ export class PostResolver {
     const posts = await query.getMany();
 
     return {
-      id: `L:${limit}C:${cursor}U:${userId}`,
+      id: `L:${limit}C:${cursor}IC:${idCursor}U:${userId}`,
       posts: posts.slice(0, cappedLimit),
       hasMore: posts.length === cappedLimit + 1,
     };
