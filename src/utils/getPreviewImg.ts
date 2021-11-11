@@ -20,9 +20,17 @@ export const getPreviewImg = async (
       previewImg = `https://img.youtube.com/vi/${videoId}/0.jpg`;
     } else {
       // scrape meta data from page for thumbnail
-      const { body: html, url } = await got(link);
-      const metadata = await metascraper({ html, url });
-      previewImg = metadata.image;
+      try {
+        const { body: html, url } = await got(link, {
+          timeout: 3000,
+          retry: 0,
+        });
+        const metadata = await metascraper({ html, url });
+        previewImg = metadata.image;
+      } catch (err) {
+        console.error(err);
+        return undefined;
+      }
     }
   }
   return previewImg;
