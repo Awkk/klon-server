@@ -10,7 +10,7 @@ import {
   Root,
   UseMiddleware,
 } from "type-graphql";
-import { getConnection } from "typeorm";
+import { Brackets, getConnection } from "typeorm";
 import { Comment } from "../entities/Comment";
 import { Post } from "../entities/Post";
 import { User } from "../entities/User";
@@ -94,6 +94,11 @@ export class PostResolver {
       .orderBy(`posts.${sort}`, order)
       .take(cappedLimit + 1);
 
+    // Filtering from userId
+    if (userId) {
+      query.andWhere("posts.authorId = :userId", { userId });
+    }
+
     // Filtering from period
     if (period && period !== SortPeriod.all) {
       const now = new Date();
@@ -113,17 +118,19 @@ export class PostResolver {
     // Filtering from cursors
     if (cursor && idCursor) {
       const compare = order === SortOrder.DESC ? "<" : ">";
-      query.andWhere(`posts.${sort} ${compare} :cursor`, { cursor });
-      query.orWhere(`posts.${sort} = :cursor AND posts.id > :idCursor`, {
-        cursor,
-        idCursor,
-      });
+      query.andWhere(
+        new Brackets((qb) => {
+          qb.andWhere(`posts.${sort} ${compare} :cursor`, { cursor }).orWhere(
+            new Brackets((qb) => {
+              qb.where(`posts.${sort} = :cursor`, { cursor }).andWhere(
+                "posts.id > :idCursor",
+                { idCursor }
+              );
+            })
+          );
+        })
+      );
       query.addOrderBy("posts.id", "ASC");
-    }
-
-    // Filtering from userId
-    if (userId) {
-      query.andWhere("posts.authorId = :userId", { userId });
     }
 
     const posts = await query.getMany();
