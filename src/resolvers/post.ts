@@ -1,3 +1,4 @@
+import { addDays, addMonths, addWeeks, addYears } from "date-fns";
 import {
   Arg,
   Ctx,
@@ -19,7 +20,7 @@ import { MyContext } from "../types/expressContext";
 import { getPreviewImg } from "../utils/getPreviewImg";
 import { PaginatedPosts } from "./types/paginatedPosts";
 import { PostInput } from "./types/postInput";
-import { PostSort, SortOrder } from "./types/postSortEnum";
+import { PostSort, SortOrder, SortPeriod } from "./types/postSortEnum";
 
 @Resolver(Post)
 export class PostResolver {
@@ -80,7 +81,11 @@ export class PostResolver {
       nullable: true,
       defaultValue: SortOrder.DESC,
     })
-    order: SortOrder
+    order: SortOrder,
+    @Arg("period", () => SortPeriod, {
+      nullable: true,
+    })
+    period: SortPeriod
   ): Promise<PaginatedPosts> {
     const cappedLimit = Math.min(50, limit);
     const query = getConnection()
@@ -89,9 +94,25 @@ export class PostResolver {
       .orderBy(`posts.${sort}`, order)
       .take(cappedLimit + 1);
 
-    const compare = order === SortOrder.DESC ? "<" : ">";
+    // Filtering from period
+    if (period && period !== SortPeriod.all) {
+      const now = new Date();
+      let startDate;
+      if (period === SortPeriod.day) {
+        startDate = addDays(now, -1);
+      } else if (period === SortPeriod.week) {
+        startDate = addWeeks(now, -1);
+      } else if (period === SortPeriod.month) {
+        startDate = addMonths(now, -1);
+      } else {
+        startDate = addYears(now, -1);
+      }
+      query.andWhere("posts.createdDate > :startDate", { startDate });
+    }
 
+    // Filtering from cursors
     if (cursor && idCursor) {
+      const compare = order === SortOrder.DESC ? "<" : ">";
       query.andWhere(`posts.${sort} ${compare} :cursor`, { cursor });
       query.orWhere(`posts.${sort} = :cursor AND posts.id > :idCursor`, {
         cursor,
@@ -100,6 +121,7 @@ export class PostResolver {
       query.addOrderBy("posts.id", "ASC");
     }
 
+    // Filtering from userId
     if (userId) {
       query.andWhere("posts.authorId = :userId", { userId });
     }
@@ -107,7 +129,7 @@ export class PostResolver {
     const posts = await query.getMany();
 
     return {
-      id: `L:${limit}C:${cursor}IC:${idCursor}U:${userId}`,
+      id: `L:${limit}C:${cursor}IC:${idCursor}U:${userId}S:${sort}O:${order}P:${period}`,
       posts: posts.slice(0, cappedLimit),
       hasMore: posts.length === cappedLimit + 1,
     };
